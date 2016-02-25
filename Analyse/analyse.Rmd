@@ -1,0 +1,327 @@
+---
+title: "Analyse"
+author: "JcB"
+date: "03/02/2016"
+output:
+  pdf_document:
+    number_sections: yes
+    toc: yes
+  html_document:
+    keep_md: yes
+    number_sections: yes
+    toc: yes
+---
+
+```{r, echo = FALSE}
+library(knitr)
+# set global chunk options
+opts_chunk$set(echo = FALSE, cache=FALSE, warning=FALSE, message = FALSE, tidy=FALSE, fig.width=8, fig.height=6, scipen= 6, digits = 2, comment = "")
+
+knit_hooks$set(inline = function(x) {prettyNum(x, big.mark=" ")})
+# fichier de données initial
+#file <- "../Data/fwdstatistiquesmmoires/Donnees nettoyees bis.csv"
+
+# fichier transmis le 18/5/2016
+#file <- "../Data/donnees essai - copie.csv"
+
+# fichier transmis le 25/5/2016
+file <- "../Data/donnees essai - copie-1.csv"
+
+d <- read.csv(file)
+str(d)
+```
+
+Sexe
+====
+
+```{r}
+d$SX <- ifelse(d$SX == 1, "HOMME", "FEMME")
+table(d$SX)
+```
+La disproportion entre les sexe n'autorise pas sz comparaison sur ce critère.
+
+Année d'obtention du diplôme
+=============================
+```{r}
+barplot(table(as.factor(d$AD)), las = 2, main = "Année d'obtention du diplôme", ylab = "Fréquence")
+
+```
+
+Formation ?
+===========
+
+```{r}
+d$FORM <- ifelse(d$FORM == 2, "NON", "OUI")
+barplot(prop.table(table(as.factor(d$FORM)))*100, las = 1, main = "Avez-vous une formation ?", ylab = "%")
+prop.table(table(as.factor(d$FORM)))*100
+
+```
+
+Préférences
+===========
+
+Nombre de méthodes utilisées (NB) par chaque sage-femme. 
+--------------------------------------------------------
+
+```{r}
+table(d$NB)
+barplot(table(d$NB), main = "Nombre de méthodes d'analgésie employées", ylab = "Fréquence", xlab = "Nombre de méthodes")
+
+```
+
+Acupuncture (ACU)
+
+```{r}
+table(d$ACU)
+barplot(table(d$ACU)[-1], main = "Préférence pour l'Acupuncture", ylab = "Fréquence", sub = "43 SF n'ont pas accès à la technique", xlab = "Position de l'acupuncture dans le choix des SF")
+
+```
+
+Homéopathie (HOM)
+```{r}
+table(d$HOM)
+barplot(table(d$HOM)[-1], main = "Préférence pour l'Homéopathie", ylab = "Fréquence", sub = "43 SF n'ont pas accès à la technique")
+
+```
+
+Bain (BAIN)
+```{r}
+table(d$BAIN)
+barplot(table(d$BAIN)[-1], main = "Préférence pour le Bain", ylab = "Fréquence", sub = "18 SF n'ont pas accès à la technique")
+
+```
+
+Techniques corporelles (TC)
+
+```{r}
+t <- table(d$TC)
+pas.acces <- as.integer(t[1])
+acces <- t[-1]
+barplot(acces, main = "Préférence pour les techniques corporelles", ylab = "Fréquence", sub = paste(pas.acces, "SF n'ont pas accès à la technique"))
+
+```
+
+Techniques manuelles
+
+```{r}
+t <- table(d$Tma)
+pas.acces <- as.integer(t[1])
+acces <- t[-1]
+barplot(acces, main = "Préférence pour les techniques manuelles", ylab = "Fréquence", sub = paste(pas.acces, "SF n'ont pas accès à la technique"))
+
+```
+
+Techniques mentales
+
+```{r}
+t <- table(d$Tme)
+pas.acces <- as.integer(t[1])
+acces <- t[-1]
+barplot(acces, main = "Préférence pour les techniques mentales", ylab = "Fréquence", sub = paste(pas.acces, "SF n'ont pas accès à la technique"))
+```
+
+Techniques de respiration
+
+```{r}
+t <- table(d$TR)
+pas.acces <- as.integer(t[1])
+acces <- t[-1]
+barplot(acces, main = "Préférence pour les techniques de respiration", ylab = "Fréquence", sub = paste(pas.acces, "SF n'ont pas accès à la technique"))
+```
+
+Techniques médicamenteuses
+
+```{r}
+t <- table(d$MED)
+pas.acces <- as.integer(t[1])
+acces <- t[-1]
+barplot(acces, main = "Préférence pour l'utilisation de médicaments", ylab = "Fréquence", sub = paste(pas.acces, "SF n'ont pas accès à la technique"))
+```
+
+Synthèse
+---------
+
+```{r}
+# on isole le groupe des techniques
+pref <- d[, c("ACU","HOM", "BAIN", "TC","Tma","Tme","TR","MED")]
+# la ligne 124 est vide
+pref <- pref[-124,]
+```
+
+Pour chaque technique, on compte le nombre de fois où elle est mise en 1
+```{r}
+# une fonction pour compter
+count.pref1 <- function(x){length(x[x == 1])}
+```
+
+Choix 1
+```{r}
+sort(apply(pref, 2, count.pref1), decreasing = TRUE)
+```
+
+Choix 2
+```{r}
+count.pref1 <- function(x){length(x[x == 2])}
+sort(apply(pref, 2, count.pref1), decreasing = TRUE)
+```
+
+Choix 3
+```{r}
+count.pref1 <- function(x){length(x[x == 3])}
+sort(apply(pref, 2, count.pref1), decreasing = TRUE)
+
+```
+
+Si on analyse la technique préférée selon le nombre de techniques utilisées (NB)
+```{r}
+# ajout de la colonne NB
+pref$NB <- d$NB[-124]
+count.pref1 <- function(x){length(x[x == 1])}
+```
+
+Si une seule méthode est utilisée (1 cas)
+```{r}
+sort(apply(pref[pref$NB == 1, 1:8], 2, count.pref1), decreasing = TRUE)
+```
+
+Si 3 méthodes sont utilisées ()
+```{r}
+sort(apply(pref[pref$NB == 3, 1:8], 2, count.pref1), decreasing = TRUE)
+```
+
+Si 4 méthodes sont utilisées ()
+```{r}
+sort(apply(pref[pref$NB == 4, 1:8], 2, count.pref1), decreasing = TRUE)
+```
+
+Si 5 méthodes sont utilisées ()
+```{r}
+sort(apply(pref[pref$NB == 5, 1:8], 2, count.pref1), decreasing = TRUE)
+```
+
+Si 6 méthodes sont utilisées ()
+```{r}
+sort(apply(pref[pref$NB == 6, 1:8], 2, count.pref1), decreasing = TRUE)
+```
+
+Si 7 méthodes sont utilisées ()
+```{r}
+sort(apply(pref[pref$NB == 7, 1:8], 2, count.pref1), decreasing = TRUE)
+```
+
+Si 8 méthodes sont utilisées ()
+```{r}
+sort(apply(pref[pref$NB == 8, 1:8], 2, count.pref1), decreasing = TRUE)
+```
+
+Si moins de 4 méthodes sont utilisées, BAIN et ACU sont les méthodes les plus utilisées.
+
+A partir de 4 techniques ou plus, les techniques comportementales et respiratoires sont les plus utilisées.
+
+Relation technique, Année du diplôme
+=====================================
+
+Acupuncture
+-----------
+```{r}
+t <- table(d$AD, d$ACU)
+# supprime la 1ere colonne (technique pas dispo)
+t <- t[, -1]
+# la somme de chaque ligne donne le nombre d'utilisateur par année
+t1 <- apply(t, 1, sum)
+barplot(t1, main = "Année du diplôme et utilisation de l'acupuncture", ylab = "Fréquence", las = 2)
+
+#corrélation
+cor.test(as.numeric(names(t1)), as.numeric(t1))
+```
+
+Technique respiratoire
+-----------------------
+```{r}
+t <- table(d$AD, d$TR)
+# supprime la 1ere colonne (technique pas dispo)
+t <- t[, -1]
+# la somme de chaque ligne donne le nombre d'utilisateur par année
+t1 <- apply(t, 1, sum)
+barplot(t1, main = "Année du diplôme et technique respiratoire", ylab = "Fréquence", las = 2)
+
+#corrélation
+cor.test(as.numeric(names(t1)), as.numeric(t1))
+
+```
+
+
+Technique du bain
+-----------------------
+```{r}
+t <- table(d$AD, d$BAIN)
+# supprime la 1ere colonne (technique pas dispo)
+t <- t[, -1]
+# la somme de chaque ligne donne le nombre d'utilisateur par année
+t1 <- apply(t, 1, sum)
+barplot(t1, main = "Année du diplôme et technique du bain", ylab = "Fréquence", las = 2)
+
+#corrélation
+cor.test(as.numeric(names(t1)), as.numeric(t1))
+
+```
+
+Technique comportementale
+-----------------------
+```{r}
+t <- table(d$AD, d$TC)
+# supprime la 1ere colonne (technique pas dispo)
+t <- t[, -1]
+# la somme de chaque ligne donne le nombre d'utilisateur par année
+t1 <- apply(t, 1, sum)
+barplot(t1, main = "Année du diplôme et technique comportementale", ylab = "Fréquence", las = 2)
+
+#corrélation
+cor.test(as.numeric(names(t1)), as.numeric(t1))
+
+```
+
+Médications
+-----------------------
+```{r}
+t <- table(d$AD, d$MED)
+# supprime la 1ere colonne (technique pas dispo)
+t <- t[, -1]
+# la somme de chaque ligne donne le nombre d'utilisateur par année
+t1 <- apply(t, 1, sum)
+barplot(t1, main = "Année du diplôme et utilisation de médications", ylab = "Fréquence", las = 2)
+
+#corrélation
+cor.test(as.numeric(names(t1)), as.numeric(t1))
+
+```
+
+Technique Manuelles
+-----------------------
+```{r}
+t <- table(d$AD, d$Tma)
+# supprime la 1ere colonne (technique pas dispo)
+t <- t[, -1]
+# la somme de chaque ligne donne le nombre d'utilisateur par année
+t1 <- apply(t, 1, sum)
+barplot(t1, main = "Année du diplôme et technique manuelles", ylab = "Fréquence", las = 2)
+
+#corrélation
+cor.test(as.numeric(names(t1)), as.numeric(t1))
+
+```
+
+Technique mentales
+-----------------------
+```{r}
+t <- table(d$AD, d$Tme)
+# supprime la 1ere colonne (technique pas dispo)
+t <- t[, -1]
+# la somme de chaque ligne donne le nombre d'utilisateur par année
+t1 <- apply(t, 1, sum)
+barplot(t1, main = "Année du diplôme et technique mentale", ylab = "Fréquence", las = 2)
+
+#corrélation
+cor.test(as.numeric(names(t1)), as.numeric(t1))
+
+```
