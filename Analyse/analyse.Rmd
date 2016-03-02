@@ -3,11 +3,11 @@ title: "Analyse"
 author: "JcB"
 date: "03/02/2016"
 output:
-  pdf_document:
-    number_sections: yes
-    toc: yes
   html_document:
     keep_md: yes
+    number_sections: yes
+    toc: yes
+  pdf_document:
     number_sections: yes
     toc: yes
 ---
@@ -21,10 +21,10 @@ knit_hooks$set(inline = function(x) {prettyNum(x, big.mark=" ")})
 # fichier de données initial
 #file <- "../Data/fwdstatistiquesmmoires/Donnees nettoyees bis.csv"
 
-# fichier transmis le 18/5/2016
+# fichier transmis le 18/2/2016
 #file <- "../Data/donnees essai - copie.csv"
 
-# fichier transmis le 25/5/2016
+# fichier transmis le 25/2/2016
 file <- "../Data/donnees essai - copie-1.csv"
 
 d <- read.csv(file)
@@ -67,22 +67,33 @@ Nombre de méthodes utilisées (NB) par chaque sage-femme.
 table(d$NB)
 barplot(table(d$NB), main = "Nombre de méthodes d'analgésie employées", ylab = "Fréquence", xlab = "Nombre de méthodes")
 
+summary(d$NB)
 ```
 
-Acupuncture (ACU)
+Les SF utilisent entre 1 et 8 méthodes pour l'analgésie obstérricale. LA médiane se situe à 6, cela veut dire que 50% des SF utilisent moins de 6 méthodes et 50% plus de 6 méthodes.
+
+### Acupuncture (ACU)
 
 ```{r}
 table(d$ACU)
+round(prop.table(table(as.factor(d$ACU))) * 100, 2)
+
 barplot(table(d$ACU)[-1], main = "Préférence pour l'Acupuncture", ylab = "Fréquence", sub = "43 SF n'ont pas accès à la technique", xlab = "Position de l'acupuncture dans le choix des SF")
 
 ```
+- 32% des SF n'ont pas accès à cette technique
+- quand la technique est disponible, 7% des SF la citent en n°1
 
 Homéopathie (HOM)
 ```{r}
 table(d$HOM)
+round(prop.table(table(as.factor(d$HOM))) * 100, 2)
+
 barplot(table(d$HOM)[-1], main = "Préférence pour l'Homéopathie", ylab = "Fréquence", sub = "43 SF n'ont pas accès à la technique")
 
 ```
+- 60% des SF n'ont pas accès à cette technique
+- quand la technique est disponible, 4,5 % des SF la citent en n°1
 
 Bain (BAIN)
 ```{r}
@@ -95,48 +106,71 @@ Techniques corporelles (TC)
 
 ```{r}
 t <- table(d$TC)
+round(prop.table(table(as.factor(d$TC))) * 100, 2)
+
 pas.acces <- as.integer(t[1])
 acces <- t[-1]
 barplot(acces, main = "Préférence pour les techniques corporelles", ylab = "Fréquence", sub = paste(pas.acces, "SF n'ont pas accès à la technique"))
 
 ```
+- 1,5% des SF n'ont pas accès à cette technique
+- quand la technique est disponible, 43 % des SF la citent en n°1
 
 Techniques manuelles
 
 ```{r}
 t <- table(d$Tma)
+round(prop.table(table(as.factor(d$Tma))) * 100, 2)
+
 pas.acces <- as.integer(t[1])
 acces <- t[-1]
 barplot(acces, main = "Préférence pour les techniques manuelles", ylab = "Fréquence", sub = paste(pas.acces, "SF n'ont pas accès à la technique"))
 
 ```
+- 37% des SF n'ont pas accès à cette technique
+- quand la technique est disponible, 2 % des SF la citent en n°1
 
 Techniques mentales
 
 ```{r}
 t <- table(d$Tme)
+round(prop.table(table(as.factor(d$Tme))) * 100, 2)
+
 pas.acces <- as.integer(t[1])
 acces <- t[-1]
 barplot(acces, main = "Préférence pour les techniques mentales", ylab = "Fréquence", sub = paste(pas.acces, "SF n'ont pas accès à la technique"))
 ```
 
+- 61% des SF n'ont pas accès à cette technique
+- quand la technique est disponible, 3 % des SF la citent en n°1
+
 Techniques de respiration
 
 ```{r}
 t <- table(d$TR)
+round(prop.table(table(as.factor(d$TR))) * 100, 2)
+
 pas.acces <- as.integer(t[1])
 acces <- t[-1]
 barplot(acces, main = "Préférence pour les techniques de respiration", ylab = "Fréquence", sub = paste(pas.acces, "SF n'ont pas accès à la technique"))
 ```
 
+- 6% des SF n'ont pas accès à cette technique
+- quand la technique est disponible, 49 % des SF la citent en n°1
+
 Techniques médicamenteuses
 
 ```{r}
 t <- table(d$MED)
+round(prop.table(table(as.factor(d$MED))) * 100, 2)
+
 pas.acces <- as.integer(t[1])
 acces <- t[-1]
 barplot(acces, main = "Préférence pour l'utilisation de médicaments", ylab = "Fréquence", sub = paste(pas.acces, "SF n'ont pas accès à la technique"))
 ```
+
+- 7% des SF n'ont pas accès à cette technique
+- quand la technique est disponible, 7,5 % des SF la citent en n°1
 
 Synthèse
 ---------
@@ -221,6 +255,23 @@ A partir de 4 techniques ou plus, les techniques comportementales et respiratoir
 Relation technique, Année du diplôme
 =====================================
 
+Regroupement des années de diplome
+----------------------------------
+
+J'ai définit 4 périodes d'années de diplôme:
+
+- 1980-1989 : étude en 3 ans
+- 1990-2006 : étude en 4 ans
+- 2007-2014 : étude en 5 ans, avec
+- 2015-aujourd’hui : formation LMD (Licence Master Doctorat)
+
+```{r, echo=FALSE}
+a <- cut(d$AD, breaks = c(1980, 1989, 2006, 2014))
+table(a)
+d$AD2 <- a
+```
+
+
 Acupuncture
 -----------
 ```{r}
@@ -231,9 +282,36 @@ t <- t[, -1]
 t1 <- apply(t, 1, sum)
 barplot(t1, main = "Année du diplôme et utilisation de l'acupuncture", ylab = "Fréquence", las = 2)
 
-#corrélation
+# corrélation
 cor.test(as.numeric(names(t1)), as.numeric(t1))
 ```
+
+Si on ne tient pas compte de l'ordre des préférence, on peut faire un tableau à  2 colonnes en croisant la décénie d'obtention du diplome et la disponibilié ou non de la technique:
+
+- technique non disponible
+- technique disponible
+```{r, echo=FALSE}
+t <- table(d$AD2, d$ACU)
+t2 <- cbind(t[,1], t[,2]+t[,3]+t[,4]+t[,5]+t[,6]+t[,7]+t[,8]+t[,9])
+colnames(t2) <- c("non disponible","disponible")
+t2
+chisq.test(t2)
+
+```
+
+Il existe un lien statistiquement significatif entre l'année d'obtention du diplome et l'utilisation de l'acupuncture.
+
+Si on s'intéresse uniquement aux SF qui ont classé cette technique parmis leur 4 préférences (totalement arbitraire) versus celles qui classent la technique à partir du 5ème rang, il n'y a plus de différence:
+
+```{r, echo=FALSE}
+t2 <- cbind(t[,2]+t[,3], t[,4] +t[,5]+t[,6]+t[,7]+t[,8]+t[,9])
+t2
+fisher.test(t2)
+
+```
+
+
+
 
 Technique respiratoire
 -----------------------
@@ -325,3 +403,67 @@ barplot(t1, main = "Année du diplôme et technique mentale", ylab = "Fréquence
 cor.test(as.numeric(names(t1)), as.numeric(t1))
 
 ```
+
+Type de maternité (TYP)
+=======================
+
+NB: ne figure pas dans l'annexe 3.
+
+```{r, echo=FALSE}
+table(d$TYP, d$AD)
+round(prop.table(table(d$TYP, d$AD)) * 100, 2)
+```
+
+Type de maternité et année du diplome
+--------------------------------------
+```{r, echo=FALSE}
+table(d$TYP, d$AD2)
+fisher.test(table(d$TYP, d$AD2))
+chisq.test(table(d$TYP, d$AD2))
+
+```
+
+Le type de maternité et l'année du diplome ne sont pas indépendants. Autrement dit selon le type, la nature des diplome et donc de la formation ne sont pas le memes.
+
+Péridurale (PP ?)
+==========
+
+```{r, echo=FALSE}
+d$PP <- factor(d$PP, levels = c(0,1), labels = c("Non", "Oui"))
+table(d$PP)
+round(prop.table(table(d$PP)) * 100, 2)
+pie(table(d$PP), main = "Péridurale précoce", col = c("palegreen", "cornflowerblue"))
+
+```
+
+Avis sur la prise en charge
+===========================
+
+```{r, echo=FALSE}
+summary(as.factor(d$PEC))
+
+```
+
+PEC et FORmation
+-----------------
+```{r, echo=FALSE}
+t <- table(d$FORM, d$PEC, dnn = c("Formation", "PEC"))
+t
+
+```
+
+Formation souhaitées
+====================
+```{r, echo=FALSE}
+# dataframe des formations
+form <- d[, c(25:32)]
+# somme des 1
+a <- apply(form, 2, sum, na.rm = TRUE)
+b <- round(apply(form, 2, sum, na.rm = TRUE)*100/nrow(d), 2)
+t <- rbind(a,b)
+rownames(t) <- c("Oui", "%")
+t
+
+
+```
+
